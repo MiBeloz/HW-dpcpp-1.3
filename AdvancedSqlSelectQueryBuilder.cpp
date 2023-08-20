@@ -51,63 +51,41 @@ std::string AdvancedSqlSelectQueryBuilder::BuildQuery() noexcept {
 
     query += "FROM " + m_table;
 
-    if (m_where_Greater.empty() && m_where_Less.empty() && m_where_GreaterOrEqual.empty() && m_where_LessOrEqual.empty()) {
+    if (m_where.empty() && m_where_Greater.empty() && m_where_Less.empty() && m_where_GreaterOrEqual.empty() && m_where_LessOrEqual.empty()) {
         query += ";\"";
     }
     else {
         query += " WHERE ";
-        size_t i = 0;
+        bool where_flag = false;
+
+        for (const auto& it : m_where) {
+            if (where_flag) query += " AND ";
+            query += it.first + "=\'" + it.second + '\'';
+            where_flag = true;
+        }
+
         for (const auto& it : m_where_Greater) {
-            i++;
-            query += it.first + '>' + it.second;
-            if (i == m_where_Greater.size()) {
-                i = 0;
-            }
-            else {
-                query += " AND ";
-            }
+            if (where_flag) query += " AND ";
+            query += it.first + ">\'" + it.second + '\'';
+            where_flag = true;
         }
 
-        if (!m_where_Greater.empty()) {
-            query += " AND ";
-        }
         for (const auto& it : m_where_Less) {
-            i++;
-            query += it.first + '<' + it.second;
-            if (i == m_where_Less.size()) {
-                i = 0;
-            }
-            else {
-                query += " AND ";
-            }
+            if (where_flag) query += " AND ";
+            query += it.first + "<\'" + it.second + '\'';
+            where_flag = true;
         }
 
-        if (!m_where_Greater.empty() || !m_where_Less.empty()) {
-            query += " AND ";
-        }
         for (const auto& it : m_where_GreaterOrEqual) {
-            i++;
-            query += it.first + '<' + it.second;
-            if (i == m_where_GreaterOrEqual.size()) {
-                i = 0;
-            }
-            else {
-                query += " AND ";
-            }
+            if (where_flag) query += " AND ";
+            query += it.first + ">=\'" + it.second + '\'';
+            where_flag = true;
         }
 
-        if (!m_where_Greater.empty() || !m_where_Less.empty() || m_where_GreaterOrEqual.empty()) {
-            query += " AND ";
-        }
         for (const auto& it : m_where_LessOrEqual) {
-            i++;
-            query += it.first + '<' + it.second;
-            if (i == m_where_LessOrEqual.size()) {
-                i = 0;
-            }
-            else {
-                query += " AND ";
-            }
+            if (where_flag) query += " AND ";
+            query += it.first + "<=\'" + it.second + '\'';
+            where_flag = true;
         }
 
         query += ";\"";
